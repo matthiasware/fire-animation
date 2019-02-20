@@ -69,7 +69,7 @@ void doFire(std::vector<sf::Vertex> &pixMat, int W, int H) {
 }
 int main() {
   const int H = 400;
-  const int W = 1200;
+  const int W = 600;
 
   sf::RenderTexture RT;
   RT.create(W, H);
