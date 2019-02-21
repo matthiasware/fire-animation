@@ -5,3 +5,5 @@
 !*.h
 !CMakeLists.txt
 !*.md
+!*.png
+!*/

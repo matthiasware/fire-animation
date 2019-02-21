@@ -2,6 +2,7 @@
 #include <random>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 const std::vector<sf::Color> cv{
     sf::Color(0xFF, 0xFF, 0xFF), sf::Color(0xEF, 0xEF, 0xC7),
@@ -22,10 +23,12 @@ const std::vector<sf::Color> cv{
     sf::Color(0x77, 0x1F, 0x07), sf::Color(0x67, 0x1F, 0x07),
     sf::Color(0x57, 0x17, 0x07), sf::Color(0x47, 0x0F, 0x07),
     sf::Color(0x2F, 0x0F, 0x07), sf::Color(0x1F, 0x07, 0x07),
-    sf::Color(0x07, 0x07, 0x07)};
+    sf::Color(0x07, 0x07, 0x07)
+};
 
 std::unordered_map<unsigned int, int> um{
-    {117901311, 36},  {520554495, 35},  {789514239, 34},  {1192167423, 33},
+    {117901311, 36},
+    {520554495, 35},  {789514239, 34},  {1192167423, 33},
     {1461127167, 32}, {1730086911, 31}, {1998522367, 30}, {2401699839, 29},
     {2670659583, 28}, {2940143615, 27}, {3209103359, 26}, {3343321087, 25},
     {3746498559, 24}, {3747022847, 23}, {3747022847, 22}, {3613329407, 21},
@@ -37,20 +40,21 @@ std::unordered_map<unsigned int, int> um{
     {4294967295, 0}};
 
 template<int W, int H>
+void spredFire(std::vector<sf::Vertex> &pixMat, int dest)
+{
+  int src = (dest - (rand() % 2) * W) - (rand() % 3) + 1;
+
+  int color = um[pixMat[src].color.toInteger()];
+  color = color + (rand() & rand() & rand() & 1);
+  color = std::min(color, static_cast<int>(cv.size()) - 1);
+  pixMat[dest].color = cv[color];
+}
+
+template<int W, int H>
 void doFire(std::vector<sf::Vertex> &pixMat) {
   for (int x = 0; x < W; ++x) {
-    for (int y = static_cast<int>(cv.size()) * 3; y >= 1; --y) {
-      const int dest = y * W + x;
-
-      // determine src
-      // const int src = (dest - (rand() % 2) * W) - (rand() % 3) + 1;
-      int rand = (rand() * 3) & 3;
-      
-      int color_index = um[pixMat[src].color.toInteger()];
-      color_index = color_index + (rand() & 1);
-      // color_index = color_index + (rand() & 1);
-      color_index = std::min(color_index, static_cast<int>(cv.size()) - 1);
-      pixMat[dest].color = cv[color_index];
+    for (int y = 1; y < H; y++) {
+      spredFire<W, H>(pixMat, y * W + x);
     }
   }
 }
@@ -62,31 +66,25 @@ int main() {
   RT.create(W, H);
   RT.setSmooth(true);
   
-  // sf::Image doomImage;
-  // doomImage.loadFromFile("doomfire.png");
-  sf::Texture doomTexture;
-  doomTexture.loadFromFile("doomfire.png");
-  doomTexture.setSmooth(true);
-  // doomTexture.setScale()
-  // doomTexture.setSmooth(true);
-  sf::Sprite sprite;
-  sprite.setTexture(doomTexture);
-  // sprite.setScale(200,200);
+  sf::Texture doomLogoTexture;
+  doomLogoTexture.loadFromFile("img/d00m.png");
+  doomLogoTexture.setSmooth(true);
 
-  // IT.loadFromImage("doomfire.png");
+  sf::Sprite sprite;
+  sprite.setTexture(doomLogoTexture);
 
   sf::RenderWindow window(sf::VideoMode(W, H, 32), "Doom Fire");
-  window.setFramerateLimit(30);
+  window.setFramerateLimit(60);
 
   std::vector<sf::Vertex> pixMat(H * W);
 
   for (int x = 0; x < W; ++x)
     for (int y = 0; y < H; ++y) {
-      sf::Color c = (y == 0) ? cv[0] : cv[cv.size() - 1];
+      sf::Color c = (y == 0) ? cv[0] : cv.back();
       pixMat[(y * W + x)] = sf::Vertex(sf::Vector2f(x, y), c);
     }
 
-  int max_frames = 300;
+  int max_frames = 150;
   while (window.isOpen()) {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -107,7 +105,8 @@ int main() {
     
     if (!--max_frames) {
       for (int x = 0; x < W; ++x)
-        pixMat[x] = sf::Vertex(sf::Vector2f(x, 0), cv.back());
+        for(int y = 0; y < 10; ++y)
+            pixMat[x] = sf::Vertex(sf::Vector2f(x, y), cv.back());
     }
   }
 }
