@@ -54,7 +54,7 @@ template<int W, int H>
 void doFire(std::vector<sf::Vertex> &pixMat) {
   for (int x = 0; x < W; ++x) {
     for (int y = 1; y < H; y++) {
-      spredFire<W, H>(pixMat, y * W + x);
+      spredFire<W, H>(pixMat, x * H + y);
     }
   }
 }
@@ -81,7 +81,8 @@ int main() {
   for (int x = 0; x < W; ++x)
     for (int y = 0; y < H; ++y) {
       sf::Color c = (y == 0) ? cv[0] : cv.back();
-      pixMat[(y * W + x)] = sf::Vertex(sf::Vector2f(x, y), c);
+      // pixMat[(y * W + x)] = sf::Vertex(sf::Vector2f(x, y), c);
+      pixMat[(x * H + y)] = sf::Vertex(sf::Vector2f(x, y), c);
     }
 
   int max_frames = 150;
@@ -106,7 +107,7 @@ int main() {
     if (!--max_frames) {
       for (int x = 0; x < W; ++x)
         for(int y = 0; y < 10; ++y)
-            pixMat[x] = sf::Vertex(sf::Vector2f(x, y), cv.back());
+            pixMat[x * H + y] = sf::Vertex(sf::Vector2f(x, y), cv.back());
     }
   }
 }
